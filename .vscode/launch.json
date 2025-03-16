@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+    {
+    "name": "pyexp",
+    "type": "debugpy",
+    "request": "launch",
+    "program": "/home/wym/llm_demos/STG1_T5QA/T5QA_train.py",
+    "python": "/home/wym/miniconda3/envs/llm/bin/python",
+    "console": "integratedTerminal",
+    "cwd": "${fileDirname}",
+    "justMyCode": false,
+    "args": [],
+    },
+    ]
+}
