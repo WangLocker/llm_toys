@@ -9,7 +9,7 @@ import time
 import torch
 import uvicorn
 from pydantic import BaseModel, Field  # 用于数据验证和序列化
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware  # 处理跨域请求
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Literal, Optional, Union
@@ -208,7 +208,7 @@ async def predict(query: str, history: List[List[str]], model_id: str):
         finish_reason=None
     )
     chunk = ChatCompletionResponse(model=model_id, choices=[choice_data], object="chat.completion.chunk")
-    yield "{}".format(chunk.json(exclude_unset=True, ensure_ascii=False))
+    yield "{}".format(chunk.model_dump_json(exclude_unset=True))
 
     # 用于追踪已生成的文本长度
     current_length = 0
@@ -231,7 +231,7 @@ async def predict(query: str, history: List[List[str]], model_id: str):
             finish_reason=None
         )
         chunk = ChatCompletionResponse(model=model_id, choices=[choice_data], object="chat.completion.chunk")
-        yield "{}".format(chunk.json(exclude_unset=True, ensure_ascii=False))
+        yield "{}".format(chunk.model_dump_json(exclude_unset=True))
 
     # 第三步：发送结束信号
     # 创建表示生成结束的响应块
@@ -241,16 +241,16 @@ async def predict(query: str, history: List[List[str]], model_id: str):
         finish_reason="stop"
     )
     chunk = ChatCompletionResponse(model=model_id, choices=[choice_data], object="chat.completion.chunk")
-    yield "{}".format(chunk.json(exclude_unset=True, ensure_ascii=False))
+    yield "{}".format(chunk.model_dump_json(exclude_unset=True))
     # 发送最终的结束标记
     yield '[DONE]'
 
 # 主程序入口
 if __name__ == "__main__":
     # 加载模型和分词器
-    tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm2-6b", trust_remote_code=True)
-    model = AutoModel.from_pretrained("THUDM/chatglm2-6b", trust_remote_code=True).cuda()
+    tokenizer = AutoTokenizer.from_pretrained("/data1/wym1/models/chatglm2-6b", trust_remote_code=True)
+    model = AutoModel.from_pretrained("/data1/wym1/models/chatglm2-6b", trust_remote_code=True).cuda()
     model.eval()
 
     # 启动服务器
-    uvicorn.run(app, host='0.0.0.0', port=8000, workers=1)
+    uvicorn.run(app, host='0.0.0.0', port=12120, workers=1)
