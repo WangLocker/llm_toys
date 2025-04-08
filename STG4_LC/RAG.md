@@ -46,3 +46,28 @@ RAG工作流的第一阶段，接收用户输入的问题，以某种方式将�
 - 其实就是让LLM根据Query的自然语言，提取其中用于Filter的关键信息字段，并使用结构化输出来让这些信息可以轻松的引用和调用，再构建实际查询操作。
 
 # Indexing
+## Chunk Optimization
+- Fixed Size会造成不合理的截断， overlap可以缓解这个问题，Recursive Character会根据符号自动切分。
+- 文档拆分器
+- Semantic Chunker的核心思想是通过 ​​句子嵌入（Sentence Embedding）​​ 将文本转换为向量，计算相邻句子的语义相似度，若相似度低于动态阈值（如分位数或标准差方法），则判定为分块边界，从而生成语义连贯、信息完整的文本块，避免传统固定分块导致的语义断裂问题
+- Agentic Chunking：将文本拆解为独立命题（Proposition），再由大语言模型（LLM）主动评估并动态分配命题到文本块。
+## Multi Representation
+- 这是一种很直观的方法，用LLM对doc进行summary的生成，再对summary部分进行embedding，执行retrieval时仅对summary的向量与问题进行匹配，将向量化的summary和字符串的原始文档通过id关联起来。
+- 这样可以将完整的文档作为context提供给LLM，保证完整的背景信息，减少split带来的信息损失。
+## Hierarchical Indexing
+以Raptor为例， 其实就是一种针对文档构建分层索引的方法，用一个递归的过程在各个层级上 Embedding + Clustering + Summary。 
+## Specialized Embeddings
+与直接将文档进行向量化不同，我们将文档分为Tokens，然后对其进行向量化，同样，在处理问题时，将问题也分为不同的Tokens，然后挨个进行相似度搜索。
+
+# Active RAG
+Active RAG 强调模型在对话或任务过程中能主动“意识到”当前信息是否足够，并做出“主动检索”的决策。
+
+**LLM decides when and what to retrieve based upon retrieval and / or generation**
+
+简单来说，从单纯的Feed Prompt——Generation变成一个带loops的状态机，所有的状态变换都在代码中完成。
+
+## CRAG（Corrective RAG）
+Corrective RAG 是一种对经典 RAG 框架的增强，它的目标是通过后处理机制纠正初始生成中的错误或遗漏，提高生成内容的准确性和完整性。重点是reasoning about the documents。
+ 
+# Adaptive RAG
+完整的状态机。
